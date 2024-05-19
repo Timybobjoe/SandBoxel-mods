@@ -120,26 +120,43 @@ elements.fighter_jet_left = {
         "M1 AND CR:fast_bullet_left|XX|CR:smoke AND EX:5>metal_scrap",
         "M1%0.2|M2%0.005 AND EX:5>metal_scrap|M2%0.005 AND EX:5>metal_scrap",
     ],
-tick: function(pixel) {
-    for (var i=0; i<2; i++) {
-            if (!tryMove(pixel, pixel.x-1, pixel.y)) {
-                if (!isEmpty(pixel.x-1, pixel.y,true)) {
-                    var newPixel = pixelMap[pixel.x-1][pixel.y];
-                    if (newPixel.element === "fast_bullet_left") { break; }
-                    if (elements[newPixel.element].state == "solid") {
-                        if (Math.random() > (elements[newPixel.element].hardness || 0)) {
-                            if (elements[newPixel.element].breakInto) {
-                                breakPixel(newPixel);
-                            }
-                            else {
-                                deletePixel(newPixel.x, newPixel.y);
-                            }}}}
-                deletePixel(pixel.x,pixel.y);
+    tick: function(pixel) {
+        // Check for walls on the left side
+        var wallOnLeft = !isEmpty(pixel.x - 1, pixel.y, true);
+
+        for (var i = 0; i < 2; i++) {
+            if (wallOnLeft) {
+                // If there's a wall on the left, move right
+                tryMove(pixel, pixel.x + 1, pixel.y);
+            } else {
+                // Otherwise, move left
+                tryMove(pixel, pixel.x - 1, pixel.y);
+            }
+
+            // Check for collision after movement
+            if (!tryMove(pixel, pixel.x, pixel.y)) {
+                var newPixel = pixelMap[pixel.x][pixel.y];
+                if (newPixel.element === "fast_bullet_left") { 
+                    break; 
+                }
+                if (elements[newPixel.element].state == "solid") {
+                    if (Math.random() > (elements[newPixel.element].hardness || 0)) {
+                        if (elements[newPixel.element].breakInto) {
+                            breakPixel(newPixel);
+                        } else {
+                            deletePixel(newPixel.x, newPixel.y);
+                        }
+                    }
+                }
+                // Delete the current pixel if collision
+                deletePixel(pixel.x, pixel.y);
                 break;
-            }}},
+            }
+        }
+    },
     category: "aircrafts",
     breakInto: "metal_scrap"
- },
+},
 elements.fighter_jet_right = {
     color: "#bcc6cc",
     behavior: [
