@@ -201,7 +201,7 @@ elements.bomber_left = {
     behavior: [
         "M1%3 AND EX:7>fire,fire,fire,metal_scrap|XX|XX",
         "M1 AND EX:7>fire,fire,fire,metal_scrap|XX|XX",
-        "M1%3 AND EX:7>fire,fire,fire,metal_scrap|XX|CR:smoke%10 AND CR:bomb",
+        "M1%3 AND EX:7>fire,fire,fire,metal_scrap|XX|CR:smoke%10",
     ],
     burnTime: 1000,
     burn: 40,
@@ -214,7 +214,7 @@ elements.bomber_left = {
         }
         
         // Check cooldown
-        if (pixelTicks - pixel.lastDropTime > 100) { // 100 ticks = 1 second assuming 1 tick = 10ms
+        if (pixelTicks - pixel.lastDropTime >= 30) { // 30 ticks = 1 second at 30 TPS
             if (isEmpty(pixel.x, pixel.y + 1)) {
                 createPixel("bomb", pixel.x, pixel.y + 1);
                 pixel.lastDropTime = pixelTicks;
@@ -222,21 +222,23 @@ elements.bomber_left = {
         }
 
         // Move the bomber left
-        if (!tryMove(pixel, pixel.x - 1, pixel.y)) {
-            if (!isEmpty(pixel.x - 1, pixel.y, true)) {
-                var newPixel = pixelMap[pixel.x - 1][pixel.y];
-                if (newPixel.element === "fast_bullet_left") { return; }
-                if (elements[newPixel.element].state == "solid") {
-                    if (Math.random() > (elements[newPixel.element].hardness || 0)) {
-                        if (elements[newPixel.element].breakInto) {
-                            breakPixel(newPixel);
-                        }
-                        else {
-                            deletePixel(newPixel.x, newPixel.y);
+        for (var i = 0; i < 2; i++) {
+            if (!tryMove(pixel, pixel.x - 1, pixel.y)) {
+                if (!isEmpty(pixel.x - 1, pixel.y, true)) {
+                    var newPixel = pixelMap[pixel.x - 1][pixel.y];
+                    if (newPixel.element === "fast_bullet_left") { break; }
+                    if (elements[newPixel.element].state == "solid") {
+                        if (Math.random() > (elements[newPixel.element].hardness || 0)) {
+                            if (elements[newPixel.element].breakInto) {
+                                breakPixel(newPixel);
+                            } else {
+                                deletePixel(newPixel.x, newPixel.y);
+                            }
                         }
                     }
                 }
                 deletePixel(pixel.x, pixel.y);
+                break;
             }
         }
     }
