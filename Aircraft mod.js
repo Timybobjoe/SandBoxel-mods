@@ -23,11 +23,11 @@ elements.fighter_jet_left = {
             wallOnLeft = !wallOnLeft; // Reverse direction
         }
 
-        // Move according to the direction
-        if (wallOnLeft) {
-            tryMove(pixel, pixel.x - 1, pixel.y); // Move left
-        } else {
-            tryMove(pixel, pixel.x + 1, pixel.y); // Move right
+        // Move according to the direction but keep within screen boundaries
+        if (wallOnLeft && pixel.x > 0) {
+            tryMove(pixel, pixel.x - 1, pixel.y); // Move left if not at the left edge
+        } else if (!wallOnLeft && pixel.x < pixelMap.width - 1) {
+            tryMove(pixel, pixel.x + 1, pixel.y); // Move right if not at the right edge
         }
 
         // Check for collision after movement
